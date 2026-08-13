@@ -1,0 +1,27 @@
+seed: 42
+
+units:
+  speed: mph
+  distance: miles
+  travel_time: minutes
+
+speed_floor_mph: 5.0
+free_flow_percentile: 95
+
+graph:
+  construction: geographic_knn
+  neighbor_k: 8
+  max_edge_km: 8.0
+  # Sensor links represent spatial relationships among loop detectors,
+  # not verified curb-to-curb roadway geometry.
+
+od_sampling:
+  n_pairs: 200
+  min_hops: 3
+  max_hops: 40
+
+strategies:
+  - static
+  - current
+  - predictive
+  - oracle

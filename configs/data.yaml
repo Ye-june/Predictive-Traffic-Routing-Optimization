@@ -1,0 +1,61 @@
+dataset:
+  name: metr-la
+  source_name: "METR-LA (Li et al., DCRNN, ICLR 2018)"
+  citation_url: "https://arxiv.org/abs/1707.01926"
+  traffic_filename: metr-la.h5
+  speed_unit: mph
+  distance_unit: meters
+  travel_time_unit: minutes
+
+# Values reported in the DCRNN paper and follow-on literature.
+# The inspection pipeline compares downloaded files against these
+# references and records any discrepancies. Do not treat them as
+# verified until scripts/inspect_data.py has been run.
+literature_reference:
+  n_sensors: 207
+  n_timesteps: 34272
+  frequency_minutes: 5
+  start_date: "2012-03-01"
+  end_date: "2012-06-30"
+  missing_sentinel: 0.0
+  reported_missing_pct: 8.11
+
+paths:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  external_dir: data/external
+  traffic_h5: data/raw/metr-la.h5
+  sensor_locations: data/raw/graph_sensor_locations.csv
+  sensor_ids: data/raw/graph_sensor_ids.txt
+  distances: data/raw/distances_la_2012.csv
+  quality_report_json: outputs/metrics/data_quality.json
+  quality_report_md: outputs/metrics/data_quality.md
+  cleaned_parquet: data/interim/metr_la_speed.parquet
+  missing_mask_parquet: data/interim/metr_la_missing_mask.parquet
+  imputed_flag_parquet: data/interim/metr_la_imputed_flag.parquet
+
+download:
+  traffic_urls:
+    - "https://huggingface.co/datasets/jimmygao3218/METRLA/resolve/main/metr-la.h5"
+    - "https://huggingface.co/datasets/MintBruce/SkyTraffic/resolve/main/metr-la.h5"
+  traffic_sha256: "64784b76d6fb8ec9bff4b6decafb354da2bb37840468fdccee5044e511277c05"
+  sensor_locations_url: "https://raw.githubusercontent.com/liyaguang/DCRNN/master/data/sensor_graph/graph_sensor_locations.csv"
+  sensor_ids_url: "https://raw.githubusercontent.com/liyaguang/DCRNN/master/data/sensor_graph/graph_sensor_ids.txt"
+  distances_url: "https://raw.githubusercontent.com/liyaguang/DCRNN/master/data/sensor_graph/distances_la_2012.csv"
+
+# Chronological split fractions. Exact timestamps are written during
+# feature-dataset construction after the real date range is known.
+splits:
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+cleaning:
+  treat_nonpositive_as_missing: true
+  max_speed_mph: 90.0
+  min_valid_speed_mph: 0.1
+  interpolate_limit_steps: 12
+  interpolation_method: time
+
+seed: 42

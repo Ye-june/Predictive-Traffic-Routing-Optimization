@@ -1,0 +1,22 @@
+{
+  "n_nodes": 207,
+  "n_edges": 11546,
+  "n_weakly_connected_components": 1,
+  "n_strongly_connected_components": 2,
+  "n_isolated_nodes": 0,
+  "average_degree": 111.55555555555556,
+  "density": 0.2707659115426106,
+  "largest_weak_component_size": 207,
+  "largest_strong_component_size": 206,
+  "is_weakly_connected": true,
+  "is_strongly_connected": false,
+  "notes": [
+    "Graph nodes are loop detectors, not intersections of a full road map.",
+    "Edge distances are DCRNN road-network costs in meters.",
+    "Graph is not strongly connected; origin-destination sampling must stay inside a reachable component."
+  ],
+  "graph_path": "C:\\Users\\elect\\github\\Predictive-Traffic-Routing-Optimization\\data\\processed\\sensor_graph.pkl",
+  "units": {
+    "edge_distance": "meters and miles"
+  }
+}

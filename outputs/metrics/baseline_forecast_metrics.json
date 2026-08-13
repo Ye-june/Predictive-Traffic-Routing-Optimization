@@ -1,0 +1,192 @@
+{
+  "split": {
+    "train_start": "2012-03-01 00:00:00",
+    "train_end": "2012-05-23 07:05:00",
+    "train_n": "23990",
+    "validation_start": "2012-05-23 07:10:00",
+    "validation_end": "2012-06-10 03:25:00",
+    "validation_n": "5140",
+    "test_start": "2012-06-10 03:30:00",
+    "test_end": "2012-06-27 23:55:00",
+    "test_n": "5142"
+  },
+  "target_unit": "mph",
+  "results": [
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "short",
+      "horizon_steps": 1,
+      "horizon_minutes": 5,
+      "split": "validation",
+      "mae_mph": 2.6209117445338963,
+      "rmse_mph": 4.3550796148392745,
+      "n_eval_cells": 1010022
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "short",
+      "horizon_steps": 1,
+      "horizon_minutes": 5,
+      "split": "validation",
+      "mae_mph": 4.343648849998594,
+      "rmse_mph": 8.009399602336488,
+      "n_eval_cells": 1010728
+    },
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "short",
+      "horizon_steps": 1,
+      "horizon_minutes": 5,
+      "split": "test",
+      "mae_mph": 2.6665795191469273,
+      "rmse_mph": 4.444747097947955,
+      "n_eval_cells": 971019
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "short",
+      "horizon_steps": 1,
+      "horizon_minutes": 5,
+      "split": "test",
+      "mae_mph": 4.298091502189893,
+      "rmse_mph": 8.049574627699052,
+      "n_eval_cells": 972205
+    },
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "medium",
+      "horizon_steps": 3,
+      "horizon_minutes": 15,
+      "split": "validation",
+      "mae_mph": 3.267129681729255,
+      "rmse_mph": 6.058313514869781,
+      "n_eval_cells": 1008614
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "medium",
+      "horizon_steps": 3,
+      "horizon_minutes": 15,
+      "split": "validation",
+      "mae_mph": 4.343648849998594,
+      "rmse_mph": 8.009399602336488,
+      "n_eval_cells": 1010728
+    },
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "medium",
+      "horizon_steps": 3,
+      "horizon_minutes": 15,
+      "split": "test",
+      "mae_mph": 3.3452939113767233,
+      "rmse_mph": 6.196856508539052,
+      "n_eval_cells": 968661
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "medium",
+      "horizon_steps": 3,
+      "horizon_minutes": 15,
+      "split": "test",
+      "mae_mph": 4.298091502189893,
+      "rmse_mph": 8.049574627699052,
+      "n_eval_cells": 972205
+    },
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "long",
+      "horizon_steps": 6,
+      "horizon_minutes": 30,
+      "split": "validation",
+      "mae_mph": 3.9410190032985097,
+      "rmse_mph": 7.657151028872854,
+      "n_eval_cells": 1006515
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "long",
+      "horizon_steps": 6,
+      "horizon_minutes": 30,
+      "split": "validation",
+      "mae_mph": 4.343648849998594,
+      "rmse_mph": 8.009399602336488,
+      "n_eval_cells": 1010728
+    },
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "long",
+      "horizon_steps": 6,
+      "horizon_minutes": 30,
+      "split": "test",
+      "mae_mph": 4.045039072259576,
+      "rmse_mph": 7.8013177839088215,
+      "n_eval_cells": 965763
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "long",
+      "horizon_steps": 6,
+      "horizon_minutes": 30,
+      "split": "test",
+      "mae_mph": 4.298091502189893,
+      "rmse_mph": 8.049574627699052,
+      "n_eval_cells": 972205
+    },
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "extra_long",
+      "horizon_steps": 12,
+      "horizon_minutes": 60,
+      "split": "validation",
+      "mae_mph": 5.035352623769088,
+      "rmse_mph": 9.900838407882793,
+      "n_eval_cells": 1003391
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "extra_long",
+      "horizon_steps": 12,
+      "horizon_minutes": 60,
+      "split": "validation",
+      "mae_mph": 4.343648849998594,
+      "rmse_mph": 8.009399602336488,
+      "n_eval_cells": 1010728
+    },
+    {
+      "model": "persistence",
+      "feature_set": "none",
+      "horizon_name": "extra_long",
+      "horizon_steps": 12,
+      "horizon_minutes": 60,
+      "split": "test",
+      "mae_mph": 5.201609619648411,
+      "rmse_mph": 10.059787142088187,
+      "n_eval_cells": 960006
+    },
+    {
+      "model": "historical_dow_hour",
+      "feature_set": "sensor+dow+hour mean (train only)",
+      "horizon_name": "extra_long",
+      "horizon_steps": 12,
+      "horizon_minutes": 60,
+      "split": "test",
+      "mae_mph": 4.298091502189893,
+      "rmse_mph": 8.049574627699052,
+      "n_eval_cells": 972205
+    }
+  ]
+}

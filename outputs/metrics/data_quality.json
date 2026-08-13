@@ -1,0 +1,109 @@
+{
+  "n_observations": 7094304,
+  "n_timestamps": 34272,
+  "n_sensors": 207,
+  "date_range": {
+    "start": "2012-03-01 00:00:00",
+    "end": "2012-06-27 23:55:00"
+  },
+  "sampling_interval_minutes": 5.0,
+  "inferred_frequency": "5min",
+  "missing": {
+    "n_null": 0,
+    "n_sentinel": 575302,
+    "n_combined": 575302,
+    "pct_null": 0.0,
+    "pct_sentinel": 8.1094,
+    "pct_combined": 8.1094,
+    "sentinel_value": 0.0,
+    "by_sensor_top": {
+      "718076": 20.104,
+      "716939": 18.861,
+      "760987": 16.141,
+      "716955": 15.68,
+      "769418": 15.607,
+      "769405": 15.599,
+      "717481": 15.065,
+      "717510": 15.044,
+      "717513": 14.061,
+      "717576": 13.641,
+      "718204": 13.501,
+      "767454": 12.418,
+      "718072": 12.051,
+      "769430": 11.928,
+      "767471": 11.89
+    },
+    "by_timestamp": {
+      "mean_pct": 8.109350825676486,
+      "median_pct": 1.4492753623188406,
+      "max_pct": 100.0,
+      "timestamps_all_missing": 2148
+    }
+  },
+  "duplicates": {
+    "n_duplicate_timestamps": 0
+  },
+  "values": {
+    "min": 0.0,
+    "max": 70.0,
+    "median": 62.44444444444444,
+    "mean_valid": 58.45972532036902,
+    "p01_valid": 13.125,
+    "p99_valid": 69.75,
+    "n_negative": 0,
+    "n_nonpositive": 575302
+  },
+  "temporal_gaps": {
+    "n_missing_expected_timestamps": 0
+  },
+  "metadata": {
+    "sensor_id_overlap": 207,
+    "n_metadata_sensors": 207
+  },
+  "literature_comparison": {
+    "n_sensors_reference": 207,
+    "n_sensors_observed": 207,
+    "n_timesteps_reference": 34272,
+    "n_timesteps_observed": 34272,
+    "frequency_minutes_reference": 5,
+    "frequency_minutes_observed": 5.0,
+    "start_date_reference": "2012-03-01",
+    "end_date_reference": "2012-06-30",
+    "reported_missing_pct": 8.11,
+    "observed_combined_missing_pct": 8.1094
+  },
+  "issues": [],
+  "notes": [
+    "575302 non-positive values present. METR-LA commonly encodes missing readings as 0; confirm before imputation."
+  ],
+  "distance_table": {
+    "n_distance_rows": 295374,
+    "n_ids_in_distance_from": 4106,
+    "n_ids_in_distance_to": 4106,
+    "overlap_with_traffic_from": 207,
+    "overlap_with_traffic_to": 207,
+    "note": "The published distances_la_2012.csv often uses a different identifier space than METR-LA sensor IDs. Overlap is measured, not assumed."
+  },
+  "schema": {
+    "index_name": "None",
+    "index_dtype": "datetime64[ns]",
+    "n_columns": 207,
+    "column_sample": [
+      "773869",
+      "767541",
+      "767542",
+      "717447",
+      "717446",
+      "717445",
+      "773062",
+      "767620",
+      "737529",
+      "717816"
+    ],
+    "value_dtype": "float64",
+    "units": {
+      "speed": "mph",
+      "distance_file_cost": "meters"
+    }
+  }
+}

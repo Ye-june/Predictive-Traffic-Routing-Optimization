@@ -47,6 +47,7 @@ data/external/*
 *.hdf5
 *.pkl
 *.pickle
+!artifacts/**/*.joblib
 
 # Trained models and generated artifacts
 models/*
@@ -64,6 +65,10 @@ outputs/routing/*
 !outputs/routing/.gitkeep
 logs/
 *.log
+
+# Compact Streamlit artifacts are committed on purpose.
+!artifacts/
+!artifacts/**/*
 
 # Keep small JSON/CSV experiment logs if committed later via explicit add
 # (default: ignore large generated outputs)

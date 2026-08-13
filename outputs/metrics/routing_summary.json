@@ -1,0 +1,19 @@
+{
+  "n_trips": 72,
+  "predictive_vs_static": {
+    "mean_savings_min": 1.5343610150237652,
+    "median_savings_min": 0.17589986675925084,
+    "pct_improved": 58.333333333333336,
+    "pct_worsened": 11.11111111111111
+  },
+  "predictive_vs_current": {
+    "mean_savings_min": -0.049037485771248925,
+    "median_savings_min": 0.0,
+    "pct_improved": 26.38888888888889,
+    "pct_worsened": 12.5
+  },
+  "predictive_regret_vs_oracle_min": {
+    "mean": 0.22807001572614427,
+    "median": 0.0
+  }
+}

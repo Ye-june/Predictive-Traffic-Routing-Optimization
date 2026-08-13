@@ -1,0 +1,143 @@
+{
+  "target_unit": "mph",
+  "test_stride": 6,
+  "results": [
+    {
+      "model": "persistence",
+      "horizon_minutes": 15,
+      "mae_mph": 3.348773803458324,
+      "rmse_mph": 6.216163468176218,
+      "n_eval_cells": 161348,
+      "feature_set": "current speed only",
+      "train_seconds": 0.0
+    },
+    {
+      "model": "historical_dow_hour",
+      "horizon_minutes": 15,
+      "mae_mph": 4.339012919482689,
+      "rmse_mph": 8.124516038653027,
+      "n_eval_cells": 161636,
+      "feature_set": "sensor+dow+hour mean",
+      "train_seconds": 0.0
+    },
+    {
+      "model": "temporal_xgboost",
+      "horizon_minutes": 15,
+      "mae_mph": 3.254183353372724,
+      "rmse_mph": 5.7756631347842875,
+      "n_eval_cells": 156634,
+      "feature_set": "lags+calendar+rolling",
+      "train_seconds": 0.8070402000012109
+    },
+    {
+      "model": "spatiotemporal_xgboost",
+      "horizon_minutes": 15,
+      "mae_mph": 3.2158182438319822,
+      "rmse_mph": 5.663767117495802,
+      "n_eval_cells": 156634,
+      "feature_set": "temporal+neighbor mean",
+      "train_seconds": 0.5323343000054592
+    },
+    {
+      "model": "persistence",
+      "horizon_minutes": 30,
+      "mae_mph": 4.050202652320451,
+      "rmse_mph": 7.809432318143569,
+      "n_eval_cells": 160460,
+      "feature_set": "current speed only",
+      "train_seconds": 0.0
+    },
+    {
+      "model": "historical_dow_hour",
+      "horizon_minutes": 30,
+      "mae_mph": 4.339012919482689,
+      "rmse_mph": 8.124516038653027,
+      "n_eval_cells": 161636,
+      "feature_set": "sensor+dow+hour mean",
+      "train_seconds": 0.0
+    },
+    {
+      "model": "temporal_xgboost",
+      "horizon_minutes": 30,
+      "mae_mph": 3.893567637829431,
+      "rmse_mph": 7.035474932997128,
+      "n_eval_cells": 155768,
+      "feature_set": "lags+calendar+rolling",
+      "train_seconds": 0.8070402000012109
+    },
+    {
+      "model": "spatiotemporal_xgboost",
+      "horizon_minutes": 30,
+      "mae_mph": 3.8450222909684793,
+      "rmse_mph": 6.895046772617628,
+      "n_eval_cells": 155768,
+      "feature_set": "temporal+neighbor mean",
+      "train_seconds": 0.5323343000054592
+    },
+    {
+      "model": "persistence",
+      "horizon_minutes": 60,
+      "mae_mph": 5.227157135632927,
+      "rmse_mph": 10.09861253402444,
+      "n_eval_cells": 159499,
+      "feature_set": "current speed only",
+      "train_seconds": 0.0
+    },
+    {
+      "model": "historical_dow_hour",
+      "horizon_minutes": 60,
+      "mae_mph": 4.339012919482689,
+      "rmse_mph": 8.124516038653027,
+      "n_eval_cells": 161636,
+      "feature_set": "sensor+dow+hour mean",
+      "train_seconds": 0.0
+    },
+    {
+      "model": "temporal_xgboost",
+      "horizon_minutes": 60,
+      "mae_mph": 4.919832947026863,
+      "rmse_mph": 8.5586692036289,
+      "n_eval_cells": 154618,
+      "feature_set": "lags+calendar+rolling",
+      "train_seconds": 0.8070402000012109
+    },
+    {
+      "model": "spatiotemporal_xgboost",
+      "horizon_minutes": 60,
+      "mae_mph": 4.847814701585498,
+      "rmse_mph": 8.447517004974896,
+      "n_eval_cells": 154618,
+      "feature_set": "temporal+neighbor mean",
+      "train_seconds": 0.5323343000054592
+    }
+  ],
+  "spatial_vs_temporal": [
+    {
+      "horizon_minutes": 15,
+      "temporal_mae": 3.254183353372724,
+      "spatial_mae": 3.2158182438319822,
+      "mae_improvement": 0.03836510954074157,
+      "mae_improvement_pct": 1.1789473847863836,
+      "rmse_improvement": 0.11189601728848508,
+      "rmse_improvement_pct": 1.9373709074995116
+    },
+    {
+      "horizon_minutes": 30,
+      "temporal_mae": 3.893567637829431,
+      "spatial_mae": 3.8450222909684793,
+      "mae_improvement": 0.0485453468609518,
+      "mae_improvement_pct": 1.2468088749580486,
+      "rmse_improvement": 0.1404281603794999,
+      "rmse_improvement_pct": 1.9960011472839856
+    },
+    {
+      "horizon_minutes": 60,
+      "temporal_mae": 4.919832947026863,
+      "spatial_mae": 4.847814701585498,
+      "mae_improvement": 0.07201824544136493,
+      "mae_improvement_pct": 1.4638351792998734,
+      "rmse_improvement": 0.11115219865400405,
+      "rmse_improvement_pct": 1.2987088998237624
+    }
+  ]
+}

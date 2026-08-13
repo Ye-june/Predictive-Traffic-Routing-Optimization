@@ -42,7 +42,11 @@ dev = [
     "ipykernel>=6.25",
 ]
 app = [
-    "streamlit>=1.28",
+    "streamlit>=1.32",
+    "plotly>=5.18",
+]
+deploy = [
+    "streamlit>=1.32",
     "plotly>=5.18",
 ]
 

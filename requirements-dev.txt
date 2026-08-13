@@ -1,0 +1,6 @@
+-r requirements.txt
+h5py>=3.8
+tables>=3.8
+pytest>=7.4
+jupyter>=1.0
+ipykernel>=6.25

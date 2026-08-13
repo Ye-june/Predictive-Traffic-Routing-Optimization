@@ -1,0 +1,39 @@
+{
+  "lags": [
+    1,
+    2,
+    3,
+    6,
+    12,
+    24
+  ],
+  "rolling_windows": [
+    3,
+    6,
+    12
+  ],
+  "horizons_minutes": [
+    15,
+    30,
+    60
+  ],
+  "include_spatial_features": [
+    "neighbor_mean",
+    "neighbor_mean_lag1"
+  ],
+  "speed_unit": "mph",
+  "speed_floor_mph": 5.0,
+  "split": {
+    "train_start": "2012-03-01 00:00:00",
+    "train_end": "2012-05-23 07:05:00",
+    "test_start": "2012-06-10 03:30:00",
+    "test_end": "2012-06-27 23:55:00"
+  },
+  "leakage_audit": [
+    "Lags use shift(positive) only.",
+    "Rolling means are lagged by one step.",
+    "Historical means and free-flow percentiles use the training window only.",
+    "Neighbor features use time t, never t+h.",
+    "Chronological split; no row shuffling."
+  ]
+}

@@ -111,6 +111,95 @@ def build_sensor_distance_graph(
     return graph
 
 
+def build_knn_routing_graph(
+    full_graph: nx.DiGraph,
+    *,
+    k: int = 8,
+    max_distance_m: float = 8000.0,
+) -> nx.DiGraph:
+    """Build a sparse directed k-NN graph suitable for shortest-path routing.
+
+    The full DCRNN distance table links almost every nearby detector pair,
+    which produces unrealistic "teleport" shortcuts. Routing therefore uses
+    only the ``k`` nearest outgoing edges within ``max_distance_m``.
+
+    If the k-NN graph is not weakly connected, additional shortest unused
+    edges are added until a single weak component remains. Reverse edges are
+    added when needed so the largest strongly connected component covers
+    nearly all sensors.
+
+    Parameters
+    ----------
+    full_graph:
+        Directed graph with ``distance_m`` / ``distance_miles`` on edges.
+    k:
+        Number of nearest neighbors retained per node.
+    max_distance_m:
+        Maximum allowed neighbor distance in meters (8 km default).
+    """
+    routing = nx.DiGraph()
+    routing.add_nodes_from(full_graph.nodes(data=True))
+    for node in full_graph.nodes:
+        candidates: list[tuple[float, str, dict[str, Any]]] = []
+        for _, dst, data in full_graph.out_edges(node, data=True):
+            distance_m = float(data["distance_m"])
+            if distance_m <= max_distance_m:
+                candidates.append((distance_m, str(dst), dict(data)))
+        candidates.sort(key=lambda item: item[0])
+        for _, dst, data in candidates[:k]:
+            routing.add_edge(str(node), dst, **data)
+
+    _connect_weak_components(full_graph, routing)
+    _ensure_strong_connectivity(full_graph, routing)
+    logger.info(
+        "Built routing k-NN graph: %s nodes, %s edges (k=%s, max_m=%s)",
+        routing.number_of_nodes(),
+        routing.number_of_edges(),
+        k,
+        max_distance_m,
+    )
+    return routing
+
+
+def _connect_weak_components(full_graph: nx.DiGraph, routing: nx.DiGraph) -> None:
+    components = [set(part) for part in nx.weakly_connected_components(routing)]
+    if len(components) <= 1:
+        return
+    remaining = sorted(components, key=len, reverse=True)
+    main = remaining[0]
+    for extra in remaining[1:]:
+        best: tuple[float, str, str, dict[str, Any]] | None = None
+        for src in extra:
+            for _, dst, data in full_graph.out_edges(src, data=True):
+                if dst in main:
+                    distance_m = float(data["distance_m"])
+                    if best is None or distance_m < best[0]:
+                        best = (distance_m, str(src), str(dst), dict(data))
+            for pred, _, data in full_graph.in_edges(src, data=True):
+                if pred in main:
+                    distance_m = float(data["distance_m"])
+                    if best is None or distance_m < best[0]:
+                        best = (distance_m, str(pred), str(src), dict(data))
+        if best is None:
+            continue
+        _, src, dst, data = best
+        routing.add_edge(src, dst, **data)
+        main.update(extra)
+
+
+def _ensure_strong_connectivity(full_graph: nx.DiGraph, routing: nx.DiGraph) -> None:
+    if nx.is_strongly_connected(routing):
+        return
+    for src, dst, data in list(routing.edges(data=True)):
+        if not routing.has_edge(dst, src):
+            reverse = dict(data)
+            routing.add_edge(dst, src, **reverse)
+    logger.info(
+        "Added reverse edges so routing graph is traversable in both directions. "
+        "This is a connectivity approximation, not verified one-way road geometry."
+    )
+
+
 def k_nearest_neighbors(
     graph: nx.DiGraph,
     *,

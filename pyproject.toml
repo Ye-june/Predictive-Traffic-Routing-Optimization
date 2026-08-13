@@ -7,7 +7,6 @@ name = "trafficflow"
 version = "0.1.0"
 description = "Spatiotemporal traffic forecasting and prediction-aware route optimization."
 readme = "README.md"
-license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [{ name = "TrafficFlow" }]
 keywords = [

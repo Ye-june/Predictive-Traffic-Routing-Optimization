@@ -134,7 +134,3 @@ tests/
 - 5.28% of cells remain missing after short-gap interpolation.
 - Routing does not model congestion feedback from the routed vehicles.
 - Spatial MAE gains are small; current-state routing is already competitive.
-
-## License
-
-MIT. Cite Li et al. (ICLR 2018) if you use METR-LA.

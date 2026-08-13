@@ -14,6 +14,7 @@ import streamlit as st
 
 from styles.theme import apply_theme, footer, metric_card, metrics_row, page_header, sidebar_brand
 from utils.charts import speed_map
+from utils.compat import plotly_chart
 from utils.load import require_bundle, sensor_options
 
 st.set_page_config(page_title="Network explorer · TrafficFlow", page_icon="◇", layout="wide")
@@ -41,9 +42,8 @@ speeds = {
     for col in bundle.speeds.columns
     if pd.notna(bundle.speeds.loc[timestamp, col])
 }
-st.plotly_chart(
-    speed_map(bundle.sensor_metadata, speeds, f"Observed speed at {timestamp.strftime('%Y-%m-%d %H:%M')}"),
-    use_container_width=True,
+plotly_chart(
+    speed_map(bundle.sensor_metadata, speeds, f"Observed speed at {timestamp.strftime('%Y-%m-%d %H:%M')}")
 )
 
 options = sensor_options(bundle)

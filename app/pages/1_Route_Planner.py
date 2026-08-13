@@ -26,6 +26,7 @@ from styles.theme import (
 from trafficflow.routing.engine import RoutingError
 from trafficflow.serving import compare_routes
 from utils.charts import ROUTE_COLORS, ROUTE_LABELS, route_map
+from utils.compat import dataframe, plotly_chart
 from utils.load import format_miles, format_minutes, require_bundle, sensor_options
 
 st.set_page_config(page_title="Route planner · TrafficFlow", page_icon="◇", layout="wide")
@@ -228,7 +229,7 @@ table = pd.DataFrame(
         for name, result in results.items()
     ]
 )
-st.dataframe(table, hide_index=True, use_container_width=True)
+dataframe(table, hide_index=True)
 
 st.markdown("#### Network route")
 st.caption(
@@ -236,7 +237,7 @@ st.caption(
     "Lines connect sensors; they are not turn-by-turn road geometry."
 )
 paths = {name: result.path for name, result in results.items()}
-st.plotly_chart(
+plotly_chart(
     route_map(
         bundle.sensor_metadata,
         bundle.graph,
@@ -244,8 +245,7 @@ st.plotly_chart(
         origin,
         destination,
         visible=show or ["predictive"],
-    ),
-    use_container_width=True,
+    )
 )
 
 why_bits = []

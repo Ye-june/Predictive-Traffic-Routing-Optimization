@@ -14,6 +14,7 @@ import streamlit as st
 
 from styles.theme import apply_theme, callout, footer, metric_card, metrics_row, page_header, sidebar_brand
 from utils.charts import styled_bar, styled_hist
+from utils.compat import dataframe, plotly_chart
 from utils.load import format_minutes, require_bundle
 
 st.set_page_config(page_title="Model performance · TrafficFlow", page_icon="◇", layout="wide")
@@ -59,14 +60,14 @@ st.caption("MAE and RMSE in mph on the chronological test subsample. Persistence
 c1, c2 = st.columns(2)
 with c1:
     st.write("MAE (mph)")
-    st.dataframe(results.pivot(index="model", columns="horizon_minutes", values="mae_mph").round(3), use_container_width=True)
+    dataframe(results.pivot(index="model", columns="horizon_minutes", values="mae_mph").round(3))
 with c2:
     st.write("RMSE (mph)")
-    st.dataframe(results.pivot(index="model", columns="horizon_minutes", values="rmse_mph").round(3), use_container_width=True)
+    dataframe(results.pivot(index="model", columns="horizon_minutes", values="rmse_mph").round(3))
 
 if not delta.empty:
     st.markdown("#### Did neighboring sensors help?")
-    st.dataframe(
+    dataframe(
         delta.rename(
             columns={
                 "horizon_minutes": "Horizon (min)",
@@ -77,9 +78,8 @@ if not delta.empty:
             }
         ).round(3),
         hide_index=True,
-        use_container_width=True,
     )
-    st.plotly_chart(
+    plotly_chart(
         styled_bar(
             delta,
             "horizon_minutes",
@@ -87,8 +87,7 @@ if not delta.empty:
             "Forecast error improvement from adding neighbor speeds",
             "Horizon (min)",
             "MAE improvement (%)",
-        ),
-        use_container_width=True,
+        )
     )
 
 st.markdown("#### Routing simulation")
@@ -123,15 +122,14 @@ if not scenarios.empty:
     ).reset_index()
     if {"static", "predictive"}.issubset(wide.columns):
         wide["savings_vs_static"] = wide["static"] - wide["predictive"]
-        st.plotly_chart(
+        plotly_chart(
             styled_hist(
                 wide,
                 "savings_vs_static",
                 "traffic_condition",
                 "Realized minutes saved by predictive routing vs static",
                 "Minutes saved (negative = worse)",
-            ),
-            use_container_width=True,
+            )
         )
 
 with st.expander("Leakage audit"):

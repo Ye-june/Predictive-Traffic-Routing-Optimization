@@ -13,6 +13,7 @@ import streamlit as st
 
 from styles.theme import apply_theme, callout, footer, metric_card, metrics_row, sidebar_brand
 from utils.charts import network_preview
+from utils.compat import plotly_chart
 from utils.load import format_minutes, require_bundle
 
 st.set_page_config(
@@ -67,7 +68,7 @@ with left:
         unsafe_allow_html=True,
     )
 with right:
-    st.plotly_chart(network_preview(bundle.sensor_metadata), use_container_width=True)
+    plotly_chart(network_preview(bundle.sensor_metadata))
     st.caption("Loop detectors, not a street map. Routes follow sensor relationships.")
 
 st.markdown("#### Evaluation snapshot")

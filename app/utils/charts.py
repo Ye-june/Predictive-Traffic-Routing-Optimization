@@ -30,6 +30,14 @@ _LAYOUT = {
 }
 
 
+def _apply_layout(fig: go.Figure, **overrides) -> go.Figure:
+    """Merge theme defaults with per-chart options without duplicate kwargs."""
+    layout = dict(_LAYOUT)
+    layout.update(overrides)
+    fig.update_layout(**layout)
+    return fig
+
+
 def _axes(fig: go.Figure) -> go.Figure:
     fig.update_xaxes(showgrid=True, gridcolor="#EEF1F4", zeroline=False, linecolor="#E4E8EC")
     fig.update_yaxes(showgrid=True, gridcolor="#EEF1F4", zeroline=False, linecolor="#E4E8EC")
@@ -50,7 +58,7 @@ def speed_map(metadata: pd.DataFrame, speeds: dict[str, float], title: str) -> g
         labels={"speed_mph": "Speed (mph)", "longitude": "Longitude", "latitude": "Latitude"},
     )
     fig.update_traces(marker={"size": 8, "line": {"width": 0}})
-    fig.update_layout(height=520, coloraxis_colorbar_title="mph", **_LAYOUT)
+    _apply_layout(fig, height=520, coloraxis_colorbar_title="mph")
     fig.update_yaxes(scaleanchor="x", scaleratio=1)
     return _axes(fig)
 
@@ -68,13 +76,13 @@ def network_preview(metadata: pd.DataFrame) -> go.Figure:
             name="Sensors",
         )
     )
-    fig.update_layout(
+    _apply_layout(
+        fig,
         title="METR-LA sensor network",
         height=320,
         xaxis_title="Longitude",
         yaxis_title="Latitude",
         showlegend=False,
-        **_LAYOUT,
         margin={"l": 40, "r": 16, "t": 48, "b": 40},
     )
     fig.update_yaxes(scaleanchor="x", scaleratio=1)
@@ -142,12 +150,12 @@ def route_map(
                 name="Destination",
             )
         )
-    fig.update_layout(
+    _apply_layout(
+        fig,
         title="Network route overlay",
         height=540,
         xaxis_title="Longitude",
         yaxis_title="Latitude",
-        **_LAYOUT,
     )
     fig.update_yaxes(scaleanchor="x", scaleratio=1)
     return _axes(fig)
@@ -174,13 +182,13 @@ def forecast_chart(
             line={"color": "#2563EB", "width": 2, "dash": "dash"},
         )
     )
-    fig.update_layout(title=title, xaxis_title="Time", yaxis_title="Speed (mph)", height=380, **_LAYOUT)
+    _apply_layout(fig, title=title, xaxis_title="Time", yaxis_title="Speed (mph)", height=380)
     return _axes(fig)
 
 
 def styled_bar(frame: pd.DataFrame, x: str, y: str, title: str, xlabel: str, ylabel: str) -> go.Figure:
     fig = px.bar(frame, x=x, y=y, title=title, labels={x: xlabel, y: ylabel}, color_discrete_sequence=["#2563EB"])
-    fig.update_layout(height=360, **_LAYOUT)
+    _apply_layout(fig, height=360)
     return _axes(fig)
 
 
@@ -194,5 +202,5 @@ def styled_hist(frame: pd.DataFrame, x: str, color: str, title: str, xlabel: str
         labels={x: xlabel},
         color_discrete_sequence=["#2563EB", "#0F8B8D", "#D98C4A"],
     )
-    fig.update_layout(height=380, **_LAYOUT, bargap=0.08)
+    _apply_layout(fig, height=380, bargap=0.08)
     return _axes(fig)

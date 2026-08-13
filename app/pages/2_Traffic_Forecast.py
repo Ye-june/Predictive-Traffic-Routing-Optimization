@@ -14,6 +14,7 @@ import streamlit as st
 
 from styles.theme import apply_theme, callout, footer, metric_card, metrics_row, page_header, sidebar_brand
 from utils.charts import forecast_chart
+from utils.compat import plotly_chart
 from utils.load import require_bundle, sensor_options
 
 st.set_page_config(page_title="Traffic forecast · TrafficFlow", page_icon="◇", layout="wide")
@@ -84,14 +85,12 @@ metrics_row(
 
 left, right = st.columns(2)
 with left:
-    st.plotly_chart(
-        forecast_chart(history, actual_future, spatial_series, "Predicted vs actual traffic speed · spatiotemporal"),
-        use_container_width=True,
+    plotly_chart(
+        forecast_chart(history, actual_future, spatial_series, "Predicted vs actual traffic speed · spatiotemporal")
     )
 with right:
-    st.plotly_chart(
-        forecast_chart(history, actual_future, temporal_series, "Predicted vs actual traffic speed · temporal"),
-        use_container_width=True,
+    plotly_chart(
+        forecast_chart(history, actual_future, temporal_series, "Predicted vs actual traffic speed · temporal")
     )
 
 neighbors = bundle.neighbors.get(sensor_id, [])

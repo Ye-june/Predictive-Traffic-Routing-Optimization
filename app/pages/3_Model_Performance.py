@@ -10,33 +10,62 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "app"))
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
-from utils.load import format_minutes, render_disclaimer, require_bundle
+from styles.theme import apply_theme, callout, footer, metric_card, metrics_row, page_header, sidebar_brand
+from utils.charts import styled_bar, styled_hist
+from utils.load import format_minutes, require_bundle
 
-st.set_page_config(page_title="Model performance · TrafficFlow", layout="wide")
+st.set_page_config(page_title="Model performance · TrafficFlow", page_icon="◇", layout="wide")
+apply_theme()
+sidebar_brand()
 bundle = require_bundle()
 
-st.title("Model performance")
-st.write(
-    "Prediction alone is not the goal. This page reports forecast error and whether "
-    "prediction-aware routing reduced realized travel time on the demo trips."
+page_header(
+    "Model performance",
+    "Prediction alone is not the goal. This page reports forecast error and whether prediction-aware routing reduced realized travel time.",
+    badges=[("Chronological test", "blue"), ("72 replay trips", "teal")],
 )
 
 results = pd.DataFrame(bundle.metrics["results"])
-st.markdown("### Forecast error on the chronological test subsample")
-st.caption("MAE / RMSE in mph. Persistence is the required naive baseline.")
-pivot_mae = results.pivot(index="model", columns="horizon_minutes", values="mae_mph").round(3)
-pivot_rmse = results.pivot(index="model", columns="horizon_minutes", values="rmse_mph").round(3)
-st.write("MAE (mph)")
-st.dataframe(pivot_mae, use_container_width=True)
-st.write("RMSE (mph)")
-st.dataframe(pivot_rmse, use_container_width=True)
-
 delta = pd.DataFrame(bundle.metrics.get("spatial_vs_temporal", []))
+summary = bundle.routing_summary
+vs_static = summary.get("predictive_vs_static", {})
+vs_current = summary.get("predictive_vs_current", {})
+
+best_row = results.loc[results["mae_mph"].idxmin()]
+best_spatial = None if delta.empty else delta.sort_values("mae_improvement_pct", ascending=False).iloc[0]
+metrics_row(
+    [
+        metric_card("Lowest MAE model", str(best_row["model"]).replace("_", " "), f"{best_row['horizon_minutes']} min horizon", "blue"),
+        metric_card(
+            "Best spatial MAE gain",
+            f"{best_spatial['mae_improvement_pct']:.1f}%" if best_spatial is not None else "—",
+            f"at {int(best_spatial['horizon_minutes'])} min" if best_spatial is not None else "",
+            "info",
+        ),
+        metric_card(
+            "Trips improved vs static",
+            f"{vs_static.get('pct_improved', float('nan')):.1f}%",
+            f"worsened {vs_static.get('pct_worsened', float('nan')):.1f}%",
+            "positive",
+        ),
+        metric_card("Mean savings vs static", format_minutes(vs_static.get("mean_savings_min")), "Realized minutes", "positive"),
+    ]
+)
+
+st.markdown("#### Forecast error by horizon")
+st.caption("MAE and RMSE in mph on the chronological test subsample. Persistence is the required naive baseline.")
+c1, c2 = st.columns(2)
+with c1:
+    st.write("MAE (mph)")
+    st.dataframe(results.pivot(index="model", columns="horizon_minutes", values="mae_mph").round(3), use_container_width=True)
+with c2:
+    st.write("RMSE (mph)")
+    st.dataframe(results.pivot(index="model", columns="horizon_minutes", values="rmse_mph").round(3), use_container_width=True)
+
 if not delta.empty:
-    st.markdown("### Did neighboring sensors help?")
+    st.markdown("#### Did neighboring sensors help?")
     st.dataframe(
         delta.rename(
             columns={
@@ -50,28 +79,27 @@ if not delta.empty:
         hide_index=True,
         use_container_width=True,
     )
-    fig = px.bar(
-        delta,
-        x="horizon_minutes",
-        y="mae_improvement_pct",
-        title="MAE improvement from adding neighbor speeds (%)",
-        labels={"horizon_minutes": "Horizon (min)", "mae_improvement_pct": "Improvement (%)"},
-        color_discrete_sequence=["#0e7c66"],
+    st.plotly_chart(
+        styled_bar(
+            delta,
+            "horizon_minutes",
+            "mae_improvement_pct",
+            "Forecast error improvement from adding neighbor speeds",
+            "Horizon (min)",
+            "MAE improvement (%)",
+        ),
+        use_container_width=True,
     )
-    st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("### Routing simulation")
-summary = bundle.routing_summary
-st.write(f"Precomputed trips: **{summary.get('n_trips', 0)}**")
-cols = st.columns(2)
-vs_static = summary.get("predictive_vs_static", {})
-vs_current = summary.get("predictive_vs_current", {})
-with cols[0]:
+st.markdown("#### Routing simulation")
+st.caption(f"Precomputed trips: {summary.get('n_trips', 0)}. Negative savings are trips where predictive routing was slower.")
+left, right = st.columns(2)
+with left:
     st.markdown("**Predictive vs static**")
     st.metric("Mean savings", format_minutes(vs_static.get("mean_savings_min")))
     st.metric("Trips improved", f"{vs_static.get('pct_improved', float('nan')):.1f}%")
     st.metric("Trips worsened", f"{vs_static.get('pct_worsened', float('nan')):.1f}%")
-with cols[1]:
+with right:
     st.markdown("**Predictive vs current-state**")
     st.metric("Mean savings", format_minutes(vs_current.get("mean_savings_min")))
     st.metric("Trips improved", f"{vs_current.get('pct_improved', float('nan')):.1f}%")
@@ -79,9 +107,10 @@ with cols[1]:
 
 regret = summary.get("predictive_regret_vs_oracle_min", {})
 if regret:
-    st.caption(
-        f"Mean regret versus the hindsight oracle: {regret.get('mean', float('nan')):.2f} min "
-        f"(median {regret.get('median', float('nan')):.2f})."
+    callout(
+        "Distance to a perfect-information oracle",
+        f"Mean regret {regret.get('mean', float('nan')):.2f} min (median {regret.get('median', float('nan')):.2f}).",
+        "info",
     )
 
 scenarios = bundle.scenarios
@@ -94,26 +123,25 @@ if not scenarios.empty:
     ).reset_index()
     if {"static", "predictive"}.issubset(wide.columns):
         wide["savings_vs_static"] = wide["static"] - wide["predictive"]
-        fig = px.histogram(
-            wide,
-            x="savings_vs_static",
-            color="traffic_condition",
-            nbins=20,
-            title="Realized minutes saved by predictive routing vs static",
-            labels={"savings_vs_static": "Minutes saved (negative = worse)"},
+        st.plotly_chart(
+            styled_hist(
+                wide,
+                "savings_vs_static",
+                "traffic_condition",
+                "Realized minutes saved by predictive routing vs static",
+                "Minutes saved (negative = worse)",
+            ),
+            use_container_width=True,
         )
-        st.plotly_chart(fig, use_container_width=True)
-        st.caption("Negative values are trips where the predictive route was slower in hindsight. They are not hidden.")
 
-st.markdown("### Leakage audit")
-config = bundle.manifest
-st.json(
-    {
-        "split": "chronological 70/15/15",
-        "demo_window": [bundle.manifest.get("demo_start"), bundle.manifest.get("demo_end")],
-        "speed_floor_mph": bundle.manifest.get("speed_floor_mph"),
-        "note": "Historical means and free-flow speeds are fit on the training window only.",
-    }
-)
+with st.expander("Leakage audit"):
+    st.write(
+        {
+            "split": "chronological 70/15/15",
+            "demo_window": [bundle.manifest.get("demo_start"), bundle.manifest.get("demo_end")],
+            "speed_floor_mph": bundle.manifest.get("speed_floor_mph"),
+            "note": "Historical means and free-flow speeds are fit on the training window only.",
+        }
+    )
 
-render_disclaimer()
+footer(bundle.manifest)

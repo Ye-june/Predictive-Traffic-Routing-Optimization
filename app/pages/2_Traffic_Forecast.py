@@ -12,18 +12,21 @@ sys.path.insert(0, str(ROOT / "app"))
 import pandas as pd
 import streamlit as st
 
+from styles.theme import apply_theme, callout, footer, metric_card, metrics_row, page_header, sidebar_brand
 from utils.charts import forecast_chart
-from utils.load import render_disclaimer, require_bundle, sensor_options
+from utils.load import require_bundle, sensor_options
 
-st.set_page_config(page_title="Traffic forecast · TrafficFlow", layout="wide")
+st.set_page_config(page_title="Traffic forecast · TrafficFlow", page_icon="◇", layout="wide")
+apply_theme()
+sidebar_brand()
 bundle = require_bundle()
 options = sensor_options(bundle)
 labels = list(options.keys())
 
-st.title("Traffic forecast")
-st.write(
-    "Traffic at one location depends on its own recent history and on nearby sensors. "
-    "Compare a temporal model with a neighbor-aware model on the same timestamp."
+page_header(
+    "Traffic forecast",
+    "See how conditions are expected to evolve, and whether neighboring sensors improve the prediction.",
+    badges=[("15 / 30 / 60 min", "blue"), ("Temporal vs spatial", "teal")],
 )
 
 c1, c2, c3 = st.columns(3)
@@ -51,46 +54,58 @@ subset = bundle.forecasts[
 ]
 
 if subset.empty:
-    st.error("Forecast data is unavailable for the selected timestamp.")
-    render_disclaimer()
+    callout(
+        "Traffic data is unavailable for this time.",
+        "Try another historical departure inside the demo window.",
+        "warn",
+    )
+    footer(bundle.manifest)
     st.stop()
 
 row = subset.iloc[0]
 pred_index = pd.DatetimeIndex([future_end])
 temporal_series = pd.Series([row["pred_temporal"]], index=pred_index)
 spatial_series = pd.Series([row["pred_spatial"]], index=pred_index)
-persist_series = pd.Series([row["pred_persistence"]], index=pred_index)
+
+actual = row["target"]
+metrics_row(
+    [
+        metric_card(
+            "Actual future speed",
+            f"{actual:.1f} mph" if pd.notna(actual) else "—",
+            "Observed at the horizon",
+            "neutral",
+        ),
+        metric_card("Spatiotemporal", f"{row['pred_spatial']:.1f} mph", "Uses neighbor speeds", "blue"),
+        metric_card("Temporal", f"{row['pred_temporal']:.1f} mph", "Own history + calendar", "info"),
+        metric_card("Persistence", f"{row['pred_persistence']:.1f} mph", "Last observed speed", "neutral"),
+    ]
+)
 
 left, right = st.columns(2)
 with left:
     st.plotly_chart(
-        forecast_chart(history, actual_future, spatial_series, "Spatiotemporal XGBoost"),
+        forecast_chart(history, actual_future, spatial_series, "Predicted vs actual traffic speed · spatiotemporal"),
         use_container_width=True,
     )
 with right:
     st.plotly_chart(
-        forecast_chart(history, actual_future, temporal_series, "Temporal XGBoost"),
+        forecast_chart(history, actual_future, temporal_series, "Predicted vs actual traffic speed · temporal"),
         use_container_width=True,
     )
 
-actual = row["target"]
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("Actual future speed", f"{actual:.1f} mph" if pd.notna(actual) else "—")
-m2.metric("Spatiotemporal", f"{row['pred_spatial']:.1f} mph")
-m3.metric("Temporal", f"{row['pred_temporal']:.1f} mph")
-m4.metric("Persistence", f"{row['pred_persistence']:.1f} mph")
-
 neighbors = bundle.neighbors.get(sensor_id, [])
-meta = bundle.sensor_metadata.set_index("sensor_id")
-st.markdown("#### Nearby sensors used as spatial context")
-if neighbors:
-    st.write(", ".join(neighbors[:8]))
-else:
-    st.write("No graph neighbors stored for this sensor.")
-
 if pd.notna(actual):
     err_s = abs(float(row["pred_spatial"]) - float(actual))
     err_t = abs(float(row["pred_temporal"]) - float(actual))
-    st.caption(f"Absolute error · spatial {err_s:.2f} mph · temporal {err_t:.2f} mph · persistence {abs(float(row['pred_persistence'])-float(actual)):.2f} mph")
+    err_p = abs(float(row["pred_persistence"]) - float(actual))
+    callout(
+        "Absolute forecast error on this point",
+        f"Spatiotemporal {err_s:.2f} mph · temporal {err_t:.2f} mph · persistence {err_p:.2f} mph.",
+        "info",
+    )
 
-render_disclaimer()
+st.markdown("#### Nearby sensors used as spatial context")
+st.write(", ".join(neighbors[:8]) if neighbors else "No graph neighbors stored for this sensor.")
+
+footer(bundle.manifest)

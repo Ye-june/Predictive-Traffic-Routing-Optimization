@@ -7,6 +7,8 @@
 
 TrafficFlow is an end-to-end spatiotemporal machine learning and network optimization system that forecasts future traffic conditions and uses those predictions to make routing decisions. The project compares traditional routing methods with prediction-aware routing to test whether better traffic forecasts produce measurable travel-time savings.
 
+Try it here: https://predictive-traffic-routing-optimization.streamlit.app/
+
 ```text
 Traffic Data → Forecasting → Predicted Edge Costs → Routing → Realized Travel Time
 ```

@@ -13,7 +13,7 @@ if str(_SRC) not in sys.path:
 import pandas as pd
 
 from trafficflow.features.temporal import chronological_split_indices
-from trafficflow.models.baseline import historical_pattern_forecast, persistence_forecast
+from trafficflow.models.baseline import historical_pattern_forecast
 from trafficflow.models.evaluation import frame_metrics
 from trafficflow.utils.config import load_config
 from trafficflow.utils.logging import get_logger
@@ -55,17 +55,27 @@ def main() -> int:
 
     for horizon_name, horizon_steps in horizons.items():
         horizon_steps = int(horizon_steps)
-        persist = persistence_forecast(speeds, horizon_steps)
         seasonal = historical_pattern_forecast(
             speeds,
             train_index=train_index,
             horizon_steps=horizon_steps,
         )
         for split_name, slc in (("validation", val_slc), ("test", test_slc)):
-            target = speeds.iloc[slc]
+            # Same (t → t+h) pairing used by the XGBoost export path.
+            feature_times = speeds.index[slc]
+            target = speeds.shift(-horizon_steps).loc[feature_times]
+            persist_pred = speeds.loc[feature_times]
+            target_times = feature_times + pd.Timedelta(minutes=5 * horizon_steps)
+            # Drop rows whose target falls outside the frame.
+            valid = target_times.isin(speeds.index)
+            feature_times = feature_times[valid]
+            target = target.loc[feature_times]
+            persist_pred = persist_pred.loc[feature_times]
+            hist_pred = seasonal.loc[target_times[valid]].copy()
+            hist_pred.index = feature_times
             for model_name, pred in (
-                ("persistence", persist.iloc[slc]),
-                ("historical_dow_hour", seasonal.iloc[slc]),
+                ("persistence", persist_pred),
+                ("historical_dow_hour", hist_pred),
             ):
                 metrics = frame_metrics(target, pred)
                 row = {

@@ -33,7 +33,7 @@ No secrets or API keys are required.
 
 `requirements.txt` is the Cloud install file. `packages.txt` installs `libgomp1` for XGBoost on Linux.
 
-After the first successful deploy, paste the public URL into the README **Live Demo** section.
+After the first successful deploy, paste the public URL into the README if it is not already there.
 
 ## What is hosted
 

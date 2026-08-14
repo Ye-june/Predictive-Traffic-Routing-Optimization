@@ -21,18 +21,19 @@
   "travel_time_unit": "minutes",
   "speed_floor_mph": 5.0,
   "artifact_bytes": {
-    "demo\\demo_forecasts.parquet": 22772884,
-    "demo\\demo_traffic.parquet": 984065,
-    "demo\\model_metrics.json": 4310,
-    "demo\\routing_scenarios.parquet": 18895,
-    "demo\\routing_summary.json": 510,
+    "demo\\demo_forecasts.parquet": 21788973,
+    "demo\\demo_traffic.parquet": 954283,
+    "demo\\model_metrics.json": 4305,
+    "demo\\routing_scenarios.parquet": 18972,
+    "demo\\routing_summary.json": 508,
     "graph\\traffic_graph.json": 306630,
-    "models\\spatiotemporal_model.joblib": 318215,
-    "models\\temporal_model.joblib": 318703,
-    "preprocessing\\feature_config.json": 794,
-    "preprocessing\\historical_means.parquet": 351122,
-    "preprocessing\\sensor_metadata.parquet": 19215
+    "metadata\\artifact_manifest.json": 1196,
+    "models\\spatiotemporal_model.joblib": 315903,
+    "models\\temporal_model.joblib": 313127,
+    "preprocessing\\feature_config.json": 953,
+    "preprocessing\\historical_means.parquet": 350856,
+    "preprocessing\\sensor_metadata.parquet": 19192
   },
-  "total_artifact_mb": 25.1,
-  "build_seconds": 112.9
+  "total_artifact_mb": 24.07,
+  "build_seconds": 90.8
 }

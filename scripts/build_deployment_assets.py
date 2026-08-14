@@ -39,7 +39,7 @@ from trafficflow.features.temporal import (
     lag_feature,
     rolling_mean,
 )
-from trafficflow.models.baseline import historical_pattern_forecast, persistence_forecast
+from trafficflow.models.baseline import historical_pattern_forecast
 from trafficflow.models.evaluation import regression_metrics
 from trafficflow.models.xgboost_model import train_speed_forecaster
 from trafficflow.routing.engine import route_with_speeds
@@ -269,11 +269,9 @@ def main() -> int:
     test_eval_index = test_index[::TEST_STRIDE]
     metrics_rows = []
     for name, steps in HORIZONS.items():
-        persist = persistence_forecast(speeds, steps).loc[test_eval_index]
-        seasonal = historical.loc[test_eval_index]
-        actual = speeds.loc[test_eval_index]
-        persist_m = regression_metrics(actual.to_numpy(), persist.to_numpy())
-        hist_m = regression_metrics(actual.to_numpy(), seasonal.to_numpy())
+        # Evaluate every model on the same (feature time t → target t+h) pairs.
+        # Persistence at origin t is speed_now; seasonal mean uses the known
+        # calendar of the target timestamp t+h (no recent-speed leakage).
         eval_t = build_eval_table(
             speeds,
             neighbor_mean,
@@ -288,6 +286,17 @@ def main() -> int:
             include_spatial=True,
             keep_index=test_eval_index,
         )
+        target_times = eval_t.index + pd.Timedelta(minutes=5 * steps)
+        hist_at_target = np.array(
+            [
+                float(historical.loc[ts, sid])
+                if ts in historical.index and sid in historical.columns
+                else np.nan
+                for ts, sid in zip(target_times, eval_t["sensor_id"].astype(str))
+            ]
+        )
+        persist_m = regression_metrics(eval_t["target"].to_numpy(), eval_t["speed_now"].to_numpy())
+        hist_m = regression_metrics(eval_t["target"].to_numpy(), hist_at_target)
         pred_t = temporal_model.predict(eval_t[feature_columns(False)])
         pred_s = spatial_model.predict(eval_s[feature_columns(True)])
         t_m = regression_metrics(eval_t["target"].to_numpy(), pred_t)
@@ -350,7 +359,6 @@ def main() -> int:
         eval_s = eval_s.copy()
         eval_t["pred_temporal"] = temporal_model.predict(eval_t[feature_columns(False)])
         eval_s["pred_spatial"] = spatial_model.predict(eval_s[feature_columns(True)])
-        persist = persistence_forecast(speeds, steps)
         merged = eval_t.reset_index().rename(columns={"index": "timestamp"})[
             ["timestamp", "sensor_id", "target", "speed_now", "pred_temporal"]
         ]
@@ -359,13 +367,17 @@ def main() -> int:
         ]
         merged = merged.merge(spatial_part, on=["timestamp", "sensor_id"], how="left")
         merged["horizon_minutes"] = int(horizon_name)
-        merged["pred_persistence"] = [
-            float(persist.loc[ts, sid]) if ts in persist.index else np.nan
-            for ts, sid in zip(merged["timestamp"], merged["sensor_id"])
-        ]
+        # Fair h-step baselines at feature time t: persistence = speed_now;
+        # historical = train mean for the calendar of target t+h.
+        merged["pred_persistence"] = merged["speed_now"]
+        target_times = pd.to_datetime(merged["timestamp"]) + pd.Timedelta(
+            minutes=int(horizon_name)
+        )
         merged["pred_historical"] = [
-            float(historical.loc[ts, sid]) if ts in historical.index else np.nan
-            for ts, sid in zip(merged["timestamp"], merged["sensor_id"])
+            float(historical.loc[ts, sid])
+            if ts in historical.index and sid in historical.columns
+            else np.nan
+            for ts, sid in zip(target_times, merged["sensor_id"].astype(str))
         ]
         forecast_frames.append(merged)
     forecasts = pd.concat(forecast_frames, ignore_index=True)
@@ -546,6 +558,8 @@ def main() -> int:
             "Historical means and free-flow percentiles use the training window only.",
             "Neighbor features use time t, never t+h.",
             "Chronological split; no row shuffling.",
+            "Short missing gaps are forward-filled only (no future-looking interpolation).",
+            "Baselines and XGBoost are scored on the same t → t+h pairs.",
         ],
     }
     (root / "preprocessing" / "feature_config.json").write_text(

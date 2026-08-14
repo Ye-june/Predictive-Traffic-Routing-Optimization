@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -133,12 +134,19 @@ if not scenarios.empty:
         )
 
 with st.expander("Leakage audit"):
+    cfg_path = ROOT / "artifacts" / "preprocessing" / "feature_config.json"
+    audit = []
+    if cfg_path.exists():
+        audit = json.loads(cfg_path.read_text(encoding="utf-8")).get("leakage_audit", [])
     st.write(
         {
             "split": "chronological 70/15/15",
             "demo_window": [bundle.manifest.get("demo_start"), bundle.manifest.get("demo_end")],
             "speed_floor_mph": bundle.manifest.get("speed_floor_mph"),
-            "note": "Historical means and free-flow speeds are fit on the training window only.",
+            "checks": audit
+            or [
+                "Historical means and free-flow speeds are fit on the training window only.",
+            ],
         }
     )
 

@@ -58,11 +58,11 @@ def main() -> int:
         "pct_imputed": round(100.0 * result.n_imputed / n_cells, 4),
         "pct_remaining_missing": round(100.0 * result.n_remaining_missing / n_cells, 4),
         "interpolate_limit_steps": result.interpolate_limit_steps,
-        "method": cleaning_cfg["interpolation_method"],
+        "method": "ffill",
         "treat_nonpositive_as_missing": cleaning_cfg["treat_nonpositive_as_missing"],
         "max_speed_mph": cleaning_cfg["max_speed_mph"],
         "limitations": [
-            "Interpolation uses only each sensor's own time series.",
+            "Short gaps are forward-filled from each sensor's own past only.",
             "Gaps longer than interpolate_limit_steps remain NaN.",
             "Sentinel zeros are treated as missing when configured; this follows "
             "the common METR-LA convention and is verified in the quality report.",

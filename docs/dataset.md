@@ -53,16 +53,16 @@ Documented in `outputs/metrics/cleaning_summary.json`:
 
 1. Treat values `<= 0` as missing (confirmed: all 575,302 missing cells are zeros, not NaN).
 2. Treat speeds `> 90 mph` as missing. No values above 70 mph were present, so this rule did not change the matrix.
-3. Interpolate along time within each sensor, limit **12 steps (1 hour)**.
+3. Forward-fill short gaps within each sensor, limit **12 steps (1 hour)** — past values only.
 4. Leave longer gaps as NaN and store masks.
 
 | Quantity | Count | Share of cells |
 | --- | --- | --- |
 | Originally missing | 575,302 | 8.11% |
-| Imputed (short gaps) | 200,380 | 2.82% |
-| Remaining missing | 374,922 | 5.28% |
+| Imputed (short gaps) | 137,067 | 1.93% |
+| Remaining missing | 438,235 | 6.18% |
 
-Limitations: interpolation cannot recover multi-hour or multi-day outages; it uses only a sensor's own history.
+Limitations: short gaps are forward-filled from each sensor's own past only; multi-hour or multi-day outages remain missing.
 
 ## Graph
 

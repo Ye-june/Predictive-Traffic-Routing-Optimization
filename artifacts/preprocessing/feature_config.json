@@ -34,6 +34,8 @@
     "Rolling means are lagged by one step.",
     "Historical means and free-flow percentiles use the training window only.",
     "Neighbor features use time t, never t+h.",
-    "Chronological split; no row shuffling."
+    "Chronological split; no row shuffling.",
+    "Short missing gaps are forward-filled only (no future-looking interpolation).",
+    "Baselines and XGBoost are scored on the same t \u2192 t+h pairs."
   ]
 }

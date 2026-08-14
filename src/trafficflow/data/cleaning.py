@@ -46,7 +46,10 @@ def clean_speed_frame(
     2. Speeds above ``max_speed_mph`` are set to missing as physically
        implausible for this freeway loop-detector corpus.
     3. Short gaps (up to ``interpolate_limit_steps`` observations) are
-       interpolated along time within each sensor.
+       filled with the last observed value (forward-fill). This uses only
+       past information. Linear/time interpolation is intentionally avoided
+       because it can peek at future observations when both sides of a gap
+       are known.
     4. Remaining gaps are left as NaN. They are **not** filled with global
        means, which would hide long outages.
 
@@ -59,11 +62,13 @@ def clean_speed_frame(
     max_speed_mph:
         Values strictly above this threshold become missing.
     interpolate_limit_steps:
-        Maximum consecutive missing steps filled by interpolation.
+        Maximum consecutive missing steps filled by forward-fill.
         At 5-minute sampling, 12 steps equals one hour.
     interpolation_method:
-        Pandas interpolation method. ``time`` uses the DatetimeIndex.
+        Retained for API compatibility. Causal forward-fill is always used;
+        pandas ``interpolate`` would leak future values on interior gaps.
     """
+    del interpolation_method  # API compat only; causal fill does not interpolate.
     speeds = frame.apply(pd.to_numeric, errors="coerce").astype(float)
     original_missing = speeds.isna()
     if treat_nonpositive_as_missing:
@@ -71,30 +76,25 @@ def clean_speed_frame(
     original_missing = original_missing | (speeds > max_speed_mph)
 
     cleaned = speeds.mask(original_missing)
-    interpolated = cleaned.interpolate(
-        method=interpolation_method,
-        axis=0,
-        limit=interpolate_limit_steps,
-        limit_direction="both",
-    )
-    imputed_mask = original_missing & interpolated.notna()
-    remaining_missing = interpolated.isna()
+    # Forward-fill only: never use later observations to impute earlier gaps.
+    filled = cleaned.ffill(limit=interpolate_limit_steps)
+    imputed_mask = original_missing & filled.notna()
+    remaining_missing = filled.isna()
 
     n_orig = int(original_missing.to_numpy().sum())
     n_imputed = int(imputed_mask.to_numpy().sum())
     n_remain = int(remaining_missing.to_numpy().sum())
     logger.info(
         "Cleaning: originally_missing=%s imputed=%s remaining_missing=%s "
-        "(limit=%s steps, method=%s)",
+        "(limit=%s steps, method=ffill)",
         f"{n_orig:,}",
         f"{n_imputed:,}",
         f"{n_remain:,}",
         interpolate_limit_steps,
-        interpolation_method,
     )
 
     return CleaningResult(
-        speeds=interpolated,
+        speeds=filled,
         missing_mask=original_missing,
         imputed_mask=imputed_mask,
         n_originally_missing=n_orig,

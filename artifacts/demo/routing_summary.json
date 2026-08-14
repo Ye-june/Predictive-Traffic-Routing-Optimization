@@ -1,19 +1,19 @@
 {
   "n_trips": 72,
   "predictive_vs_static": {
-    "mean_savings_min": 1.5343610150237652,
-    "median_savings_min": 0.17589986675925084,
-    "pct_improved": 58.333333333333336,
-    "pct_worsened": 11.11111111111111
+    "mean_savings_min": 1.435754512450869,
+    "median_savings_min": 0.2198526907586693,
+    "pct_improved": 61.111111111111114,
+    "pct_worsened": 8.333333333333332
   },
   "predictive_vs_current": {
-    "mean_savings_min": -0.049037485771248925,
+    "mean_savings_min": -0.07560389652445411,
     "median_savings_min": 0.0,
-    "pct_improved": 26.38888888888889,
-    "pct_worsened": 12.5
+    "pct_improved": 25.0,
+    "pct_worsened": 18.055555555555554
   },
   "predictive_regret_vs_oracle_min": {
-    "mean": 0.22807001572614427,
+    "mean": 0.13906884008303413,
     "median": 0.0
   }
 }

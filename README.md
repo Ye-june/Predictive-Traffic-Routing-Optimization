@@ -28,23 +28,23 @@ More detail in [docs/dataset.md](docs/dataset.md).
 
 ### Forecasting (test set, MAE in mph)
 
-Models trained on data through May 23; tested on June 10–27.
+Models trained on data through May 23; tested on June 10–27. Every model is scored on the same forecast origin → target pairs.
 
 | Model | 15 min | 30 min | 60 min |
 | --- | ---: | ---: | ---: |
-| Persistence (last value) | 3.35 | 4.05 | 5.23 |
-| Historical weekday average | 4.34 | 4.34 | **4.34** |
-| XGBoost (temporal) | 3.25 | 3.89 | 4.92 |
-| XGBoost (+ neighbors) | **3.22** | **3.85** | 4.85 |
+| Persistence (last value) | 3.40 | 4.10 | 5.29 |
+| Historical weekday average | 4.28 | 4.33 | **4.33** |
+| XGBoost (temporal) | 3.25 | 3.88 | 4.96 |
+| XGBoost (+ neighbors) | **3.24** | **3.87** | 4.89 |
 
-Adding neighbor speeds helps a little (~1–1.5% better MAE). Persistence is still hard to beat at short horizons. The weekday average does best at 60 minutes.
+Adding neighbor speeds helps a little (about **0.4–1.3%** better MAE). Persistence is still hard to beat at short horizons. The weekday average does best at 60 minutes.
 
 ### Routing (72 trips, demo week)
 
 | vs. | Mean difference | Trips improved |
 | --- | ---: | ---: |
-| Static free-flow route | **+1.5 min saved** | 58% |
-| Current-traffic route | −0.05 min | 26% |
+| Static free-flow route | **+1.4 min saved** | 61% |
+| Current-traffic route | −0.08 min | 25% |
 
 Forecast-based routing usually beats a naive static plan. It does not clearly beat routing on current traffic — which is worth knowing.
 
@@ -63,6 +63,7 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev,app]"
 
 python scripts/download_data.py
+python scripts/prepare_data.py
 python scripts/build_deployment_assets.py
 streamlit run app/streamlit_app.py
 ```
@@ -88,4 +89,6 @@ docs/
 - Freeway sensors only — not a city street map
 - Historical data, not live traffic
 - Small forecasting gains from spatial features
+- Predictive routing uses one forecast snapshot for all edges (realized scoring still advances time along the path)
 - No model of how routed cars would affect congestion
+- `configs/model.yaml` hyperparameters are not what the compact Cloud models use; training settings live in `scripts/build_deployment_assets.py`

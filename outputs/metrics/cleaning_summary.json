@@ -3,17 +3,17 @@
   "missing_mask_parquet": "C:\\Users\\elect\\github\\Predictive-Traffic-Routing-Optimization\\data\\interim\\metr_la_missing_mask.parquet",
   "imputed_flag_parquet": "C:\\Users\\elect\\github\\Predictive-Traffic-Routing-Optimization\\data\\interim\\metr_la_imputed_flag.parquet",
   "n_originally_missing": 575302,
-  "n_imputed": 200380,
-  "n_remaining_missing": 374922,
+  "n_imputed": 137067,
+  "n_remaining_missing": 438235,
   "pct_originally_missing": 8.1094,
-  "pct_imputed": 2.8245,
-  "pct_remaining_missing": 5.2848,
+  "pct_imputed": 1.9321,
+  "pct_remaining_missing": 6.1773,
   "interpolate_limit_steps": 12,
-  "method": "time",
+  "method": "ffill",
   "treat_nonpositive_as_missing": true,
   "max_speed_mph": 90.0,
   "limitations": [
-    "Interpolation uses only each sensor's own time series.",
+    "Short gaps are forward-filled from each sensor's own past only.",
     "Gaps longer than interpolate_limit_steps remain NaN.",
     "Sentinel zeros are treated as missing when configured; this follows the common METR-LA convention and is verified in the quality report."
   ]

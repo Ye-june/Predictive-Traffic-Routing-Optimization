@@ -56,6 +56,7 @@ cleaning:
   max_speed_mph: 90.0
   min_valid_speed_mph: 0.1
   interpolate_limit_steps: 12
-  interpolation_method: time
+  # Causal only: forward-fill. Do not use pandas interpolate (leaks future).
+  interpolation_method: ffill
 
 seed: 42

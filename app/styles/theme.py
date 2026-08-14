@@ -82,9 +82,7 @@ def metric_card(label: str, value: str, hint: str = "", variant: str = "neutral"
 
 def metrics_row(cards: list[str]) -> None:
     st.markdown(
-        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:0 0 1.1rem;">'
-        + "".join(cards)
-        + "</div>",
+        '<div class="tf-metrics-row">' + "".join(cards) + "</div>",
         unsafe_allow_html=True,
     )
 

@@ -164,8 +164,9 @@ div[data-baseweb="select"] > div {
   background: var(--tf-surface);
   border: 1px solid var(--tf-line);
   border-radius: var(--tf-radius);
-  padding: 1rem 1.05rem 0.9rem;
+  padding: 0.85rem 1rem 0.75rem;
   box-shadow: var(--tf-shadow);
+  margin-bottom: 0.55rem;
 }
 
 [data-testid="stMetricLabel"] {
@@ -185,11 +186,50 @@ div[data-baseweb="select"] > div {
   border: 1px solid var(--tf-line) !important;
 }
 
+/* Vertical rhythm — Streamlit defaults leave large gaps between stacked blocks */
+[data-testid="stMainBlockContainer"] [data-testid="stVerticalBlock"] {
+  gap: 0.55rem !important;
+}
+
+[data-testid="stMainBlockContainer"] [data-testid="stHorizontalBlock"] {
+  gap: 1rem !important;
+}
+
+div[data-testid="stMarkdownContainer"] h4 {
+  margin: 1.15rem 0 0.25rem !important;
+  font-size: 1.15rem !important;
+  letter-spacing: -0.02em;
+  font-weight: 700 !important;
+}
+
+div[data-testid="stMarkdownContainer"] p {
+  margin-bottom: 0.35rem !important;
+}
+
+div[data-testid="stCaptionContainer"] {
+  margin-top: -0.15rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* Custom HTML blocks should not inherit extra paragraph padding */
+div[data-testid="stMarkdownContainer"]:has(.tf-metric),
+div[data-testid="stMarkdownContainer"]:has(.tf-callout),
+div[data-testid="stMarkdownContainer"]:has(.tf-page-head),
+div[data-testid="stMarkdownContainer"]:has(.tf-compare),
+div[data-testid="stMarkdownContainer"]:has(.tf-card) {
+  margin-bottom: 0 !important;
+}
+
 /* Dataframes / expanders */
 [data-testid="stDataFrame"] {
   border: 1px solid var(--tf-line);
   border-radius: 12px;
   overflow: hidden;
+  margin: 0.15rem 0 0.85rem;
+}
+
+[data-testid="stExpander"] {
+  margin-top: 0.85rem !important;
 }
 
 .streamlit-expanderHeader {
@@ -199,6 +239,10 @@ div[data-baseweb="select"] > div {
 /* Plotly */
 .js-plotly-plot .plotly {
   border-radius: 12px;
+}
+
+div[data-testid="stPlotlyChart"] {
+  margin: 0.25rem 0 0.85rem !important;
 }
 
 /* Custom components */
@@ -356,6 +400,14 @@ div[data-baseweb="select"] > div {
   line-height: 1.55;
 }
 
+.tf-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0 0 0.85rem;
+  align-items: stretch;
+}
+
 .tf-metric {
   background: var(--tf-surface);
   border: 1px solid var(--tf-line);
@@ -364,7 +416,8 @@ div[data-baseweb="select"] > div {
   padding: 1rem 1.05rem 0.95rem;
   position: relative;
   overflow: hidden;
-  min-height: 6.2rem;
+  min-height: 0;
+  height: 100%;
 }
 
 .tf-metric::before {
@@ -409,6 +462,7 @@ div[data-baseweb="select"] > div {
   padding: 1rem 1.15rem;
   background: var(--tf-surface);
   box-shadow: var(--tf-shadow);
+  margin: 0.85rem 0 1rem;
 }
 
 .tf-callout.good {

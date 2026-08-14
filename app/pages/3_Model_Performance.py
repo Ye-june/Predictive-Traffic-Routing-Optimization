@@ -39,7 +39,12 @@ best_row = results.loc[results["mae_mph"].idxmin()]
 best_spatial = None if delta.empty else delta.sort_values("mae_improvement_pct", ascending=False).iloc[0]
 metrics_row(
     [
-        metric_card("Lowest MAE model", str(best_row["model"]).replace("_", " "), f"{best_row['horizon_minutes']} min horizon", "blue"),
+        metric_card(
+            "Lowest MAE model",
+            str(best_row["model"]).replace("_", " "),
+            f"{best_row['horizon_minutes']} min horizon",
+            "blue",
+        ),
         metric_card(
             "Best spatial MAE gain",
             f"{best_spatial['mae_improvement_pct']:.1f}%" if best_spatial is not None else "—",
@@ -52,22 +57,28 @@ metrics_row(
             f"worsened {vs_static.get('pct_worsened', float('nan')):.1f}%",
             "positive",
         ),
-        metric_card("Mean savings vs static", format_minutes(vs_static.get("mean_savings_min")), "Realized minutes", "positive"),
+        metric_card(
+            "Mean savings vs static",
+            format_minutes(vs_static.get("mean_savings_min")),
+            "Realized minutes",
+            "positive",
+        ),
     ]
 )
 
 st.markdown("#### Forecast error by horizon")
 st.caption("MAE and RMSE in mph on the chronological test subsample. Persistence is the required naive baseline.")
-c1, c2 = st.columns(2)
+c1, c2 = st.columns(2, gap="large")
 with c1:
-    st.write("MAE (mph)")
+    st.markdown("**MAE (mph)**")
     dataframe(results.pivot(index="model", columns="horizon_minutes", values="mae_mph").round(3))
 with c2:
-    st.write("RMSE (mph)")
+    st.markdown("**RMSE (mph)**")
     dataframe(results.pivot(index="model", columns="horizon_minutes", values="rmse_mph").round(3))
 
 if not delta.empty:
     st.markdown("#### Did neighboring sensors help?")
+    st.caption("Same test pairs for temporal vs spatiotemporal XGBoost. Positive values mean neighbors helped.")
     dataframe(
         delta.rename(
             columns={
@@ -92,24 +103,42 @@ if not delta.empty:
     )
 
 st.markdown("#### Routing simulation")
-st.caption(f"Precomputed trips: {summary.get('n_trips', 0)}. Negative savings are trips where predictive routing was slower.")
-left, right = st.columns(2)
-with left:
-    st.markdown("**Predictive vs static**")
-    st.metric("Mean savings", format_minutes(vs_static.get("mean_savings_min")))
-    st.metric("Trips improved", f"{vs_static.get('pct_improved', float('nan')):.1f}%")
-    st.metric("Trips worsened", f"{vs_static.get('pct_worsened', float('nan')):.1f}%")
-with right:
-    st.markdown("**Predictive vs current-state**")
-    st.metric("Mean savings", format_minutes(vs_current.get("mean_savings_min")))
-    st.metric("Trips improved", f"{vs_current.get('pct_improved', float('nan')):.1f}%")
-    st.metric("Trips worsened", f"{vs_current.get('pct_worsened', float('nan')):.1f}%")
+st.caption(
+    f"Precomputed trips: {summary.get('n_trips', 0)}. "
+    "Negative savings are trips where predictive routing was slower."
+)
+
+metrics_row(
+    [
+        metric_card(
+            "Vs static · mean",
+            format_minutes(vs_static.get("mean_savings_min")),
+            f"improved {vs_static.get('pct_improved', float('nan')):.1f}% · "
+            f"worsened {vs_static.get('pct_worsened', float('nan')):.1f}%",
+            "positive" if (vs_static.get("mean_savings_min") or 0) > 0 else "neutral",
+        ),
+        metric_card(
+            "Vs current · mean",
+            format_minutes(vs_current.get("mean_savings_min")),
+            f"improved {vs_current.get('pct_improved', float('nan')):.1f}% · "
+            f"worsened {vs_current.get('pct_worsened', float('nan')):.1f}%",
+            "info",
+        ),
+        metric_card(
+            "Regret vs oracle",
+            format_minutes(summary.get("predictive_regret_vs_oracle_min", {}).get("mean")),
+            f"median {format_minutes(summary.get('predictive_regret_vs_oracle_min', {}).get('median'))}",
+            "neutral",
+        ),
+    ]
+)
 
 regret = summary.get("predictive_regret_vs_oracle_min", {})
 if regret:
     callout(
         "Distance to a perfect-information oracle",
-        f"Mean regret {regret.get('mean', float('nan')):.2f} min (median {regret.get('median', float('nan')):.2f}).",
+        f"Mean regret {regret.get('mean', float('nan')):.2f} min "
+        f"(median {regret.get('median', float('nan')):.2f}).",
         "info",
     )
 

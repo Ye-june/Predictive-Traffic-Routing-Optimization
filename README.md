@@ -1,13 +1,10 @@
 # TrafficFlow
 
-[![Python 3.10](https://img.shields.io/badge/python-3.10-3776AB.svg)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-app-FF4B4B.svg)](https://streamlit.io)
-
 TrafficFlow predicts traffic speeds on a freeway sensor network, then uses those forecasts to pick routes. The main question: does knowing what traffic will look like in 15–60 minutes actually save travel time?
 
 **Try the app:** https://predictive-traffic-routing-optimization.streamlit.app/
 
-This is a historical replay demo — not live navigation. Pick a past departure time, compare routes, and see how they would have performed on traffic that really happened.
+This is a historical replay demo and not live navigation. Pick a past departure time, compare routes, and see how they would have performed on traffic that really happened.
 
 ## What it does
 

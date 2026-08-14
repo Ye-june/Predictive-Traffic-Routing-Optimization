@@ -53,14 +53,12 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
   background: var(--tf-navy) !important;
 }
 
-[data-testid="stSidebar"] * {
-  color: #f5f7f8;
-}
-
 [data-testid="stSidebar"] .stMarkdown,
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] span {
+[data-testid="stSidebar"] span:not([data-baseweb="tag"]):not([data-testid="stIconMaterial"]),
+[data-testid="stSidebar"] .streamlit-expanderHeader,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
   color: #d5dde4 !important;
 }
 
@@ -113,11 +111,27 @@ div[data-baseweb="select"] > div {
   border-radius: 10px !important;
   border-color: var(--tf-line) !important;
   background: var(--tf-surface) !important;
+  color: var(--tf-text) !important;
 }
 
-[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div,
+[data-testid="stSidebar"] .stMultiSelect div[data-baseweb="select"] > div {
+  background: var(--tf-surface) !important;
+  border-color: var(--tf-line) !important;
+  color: var(--tf-text) !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div *,
+[data-testid="stSidebar"] .stMultiSelect div[data-baseweb="select"] > div *,
+[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] input,
+[data-testid="stSidebar"] .stMultiSelect div[data-baseweb="select"] input {
+  color: var(--tf-text) !important;
+  -webkit-text-fill-color: var(--tf-text) !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] svg,
+[data-testid="stSidebar"] .stMultiSelect div[data-baseweb="select"] svg {
+  fill: var(--tf-muted) !important;
 }
 
 /* Buttons */

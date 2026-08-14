@@ -7,7 +7,7 @@ TrafficFlow predicts traffic speeds on a freeway sensor network, then uses those
 
 **Try the app:** https://predictive-traffic-routing-optimization.streamlit.app/
 
-This is a historical replay demo — not live navigation. Pick a past departure time, compare routes, and see how they would have performed on traffic that really happened.
+This is a historical replay demo and not live navigation. Pick a past departure time, compare routes, and see how they would have performed on traffic that really happened.
 
 ## What it does
 

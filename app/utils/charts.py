@@ -193,14 +193,36 @@ def styled_bar(frame: pd.DataFrame, x: str, y: str, title: str, xlabel: str, yla
 
 
 def styled_hist(frame: pd.DataFrame, x: str, color: str, title: str, xlabel: str) -> go.Figure:
+    plot_frame = frame[[x, color]].copy()
+    # Rename before Plotly sees the column — otherwise the raw field name
+    # ("traffic_condition") is drawn as a second title above the legend.
+    legend_col = "Traffic window"
+    plot_frame[legend_col] = (
+        plot_frame[color].astype(str).str.replace("_", " ", regex=False).str.title()
+    )
+    plot_frame = plot_frame.drop(columns=[color])
     fig = px.histogram(
-        frame,
+        plot_frame,
         x=x,
-        color=color,
+        color=legend_col,
         nbins=20,
         title=title,
         labels={x: xlabel},
         color_discrete_sequence=["#2563EB", "#0F8B8D", "#D98C4A"],
     )
-    _apply_layout(fig, height=380, bargap=0.08)
+    # Legend below the plot so it cannot collide with the chart title.
+    _apply_layout(
+        fig,
+        height=420,
+        bargap=0.08,
+        margin={"l": 48, "r": 18, "t": 56, "b": 88},
+        legend={
+            "orientation": "h",
+            "yanchor": "top",
+            "y": -0.18,
+            "x": 0,
+            "title": {"text": ""},
+        },
+    )
+    fig.update_layout(legend_title_text="")
     return _axes(fig)

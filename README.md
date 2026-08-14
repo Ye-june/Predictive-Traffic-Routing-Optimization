@@ -2,137 +2,90 @@
 
 [![Python 3.10](https://img.shields.io/badge/python-3.10-3776AB.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-app-FF4B4B.svg)](https://streamlit.io)
-[![XGBoost](https://img.shields.io/badge/XGBoost-forecasting-2e8b57.svg)](https://xgboost.readthedocs.io)
-[![NetworkX](https://img.shields.io/badge/NetworkX-routing-1f4e79.svg)](https://networkx.org)
 
-TrafficFlow is an end-to-end spatiotemporal machine learning and network optimization system that forecasts future traffic conditions and uses those predictions to make routing decisions. The project compares traditional routing methods with prediction-aware routing to test whether better traffic forecasts produce measurable travel-time savings.
+TrafficFlow predicts traffic speeds on a freeway sensor network, then uses those forecasts to pick routes. The main question: does knowing what traffic will look like in 15–60 minutes actually save travel time?
 
-Try it here: https://predictive-traffic-routing-optimization.streamlit.app/
+**Try the app:** https://predictive-traffic-routing-optimization.streamlit.app/
 
-```text
-Traffic Data → Forecasting → Predicted Edge Costs → Routing → Realized Travel Time
-```
+This is a historical replay demo — not live navigation. Pick a past departure time, compare routes, and see how they would have performed on traffic that really happened.
 
-## Live demo
+## What it does
 
-**Historical Replay Mode** (not live navigation).
+1. Forecast speed at each sensor (XGBoost, with and without neighbor sensors)
+2. Turn those speeds into travel times on a sensor graph
+3. Run Dijkstra to find static, current-traffic, and forecast-based routes
+4. Score each route on the traffic that actually occurred
 
-Run locally:
+Routes are judged on real future speeds, not on what the model guessed its own trip time would be.
 
-```bash
-python -m pip install -r requirements.txt
-python -m pip install -e .
-streamlit run app/streamlit_app.py
-```
+## Data
 
-Deploy from GitHub with [Streamlit Community Cloud](https://share.streamlit.io): select `app/streamlit_app.py` on branch `main`. Step-by-step notes are in [docs/deployment.md](docs/deployment.md). After the first Cloud deploy, this section should be updated with the public URL.
+[METR-LA](https://arxiv.org/abs/1707.01926) — 207 loop detectors in Los Angeles, 5-minute speed readings from March–June 2012. About 8% of values are missing (stored as zeros).
 
-The hosted app loads compact artifacts under `artifacts/`. It does **not** retrain models.
+More detail in [docs/dataset.md](docs/dataset.md).
 
-## Research question
+## Results
 
-Can spatial relationships between roadway sensors improve future traffic predictions, and can those predictions improve routing decisions compared with static or non-predictive routing?
+### Forecasting (test set, MAE in mph)
 
-Routes are scored on **realized future traffic**, not on the travel time a model predicted for itself.
+Models trained on data through May 23; tested on June 10–27.
 
-## Dataset
-
-METR-LA (Li et al., [DCRNN, ICLR 2018](https://arxiv.org/abs/1707.01926)), inspected from the downloaded files:
-
-| Property | Observed |
-| --- | --- |
-| Sensors | 207 |
-| Timestamps | 34,272 |
-| Sampling | 5 minutes |
-| Period | 2012-03-01 00:00 → 2012-06-27 23:55 |
-| Target | Speed (mph) |
-| Missing | 8.1094%, stored as zeros |
-
-Details: [docs/dataset.md](docs/dataset.md).
-
-## Forecasting results (chronological test subsample)
-
-Train 2012-03-01 → 2012-05-23; test 2012-06-10 → 2012-06-27. Evaluation uses every 6th test timestamp. Units: mph.
-
-| Model | 15 min MAE | 30 min MAE | 60 min MAE |
+| Model | 15 min | 30 min | 60 min |
 | --- | ---: | ---: | ---: |
-| Persistence | 3.349 | 4.050 | 5.227 |
-| Historical weekday-hour mean | 4.339 | 4.339 | **4.339** |
-| Temporal XGBoost | 3.254 | 3.894 | 4.920 |
-| Spatiotemporal XGBoost | **3.216** | **3.845** | 4.848 |
+| Persistence (last value) | 3.35 | 4.05 | 5.23 |
+| Historical weekday average | 4.34 | 4.34 | **4.34** |
+| XGBoost (temporal) | 3.25 | 3.89 | 4.92 |
+| XGBoost (+ neighbors) | **3.22** | **3.85** | 4.85 |
 
-Neighbor speeds improve MAE by about **1.2% at 15 min**, **1.2% at 30 min**, and **1.5% at 60 min** versus the same XGBoost without spatial features. The gain is real but modest. Persistence remains a strong short-horizon baseline; the seasonal mean still wins at 60 minutes among the non-boosted models.
+Adding neighbor speeds helps a little (~1–1.5% better MAE). Persistence is still hard to beat at short horizons. The weekday average does best at 60 minutes.
 
-Source: `artifacts/demo/model_metrics.json`.
+### Routing (72 trips, demo week)
 
-## Routing results (historical replay)
+| vs. | Mean difference | Trips improved |
+| --- | ---: | ---: |
+| Static free-flow route | **+1.5 min saved** | 58% |
+| Current-traffic route | −0.05 min | 26% |
 
-72 origin–destination trips on the demo week (2012-06-21 → 2012-06-27), scored with actual future speeds:
+Forecast-based routing usually beats a naive static plan. It does not clearly beat routing on current traffic — which is worth knowing.
 
-| Comparison | Mean savings | Median | Improved | Worsened |
-| --- | ---: | ---: | ---: | ---: |
-| Predictive vs static (free-flow) | **+1.53 min** | +0.18 min | 58.3% | 11.1% |
-| Predictive vs current-state | −0.05 min | 0.00 min | 26.4% | 12.5% |
+## How routing works
 
-Mean regret versus a hindsight oracle: **0.23 min**. Predictive routing beats a static free-flow plan more often than not. It does **not** reliably beat a current-traffic shortest path on this sensor graph — that is a result, not a claim to hide.
+The app builds a graph from the 207 sensors (8 nearest neighbors within 8 km, with reverse edges added). Edge cost is `miles / max(speed, 5 mph) × 60`. Paths follow sensor links, not real street geometry.
 
-Source: `artifacts/demo/routing_summary.json`.
+The full DCRNN distance table has too many shortcuts for routing, so a sparser k-NN graph is used instead.
 
-## Methods
-
-1. Persistence and train-only historical-mean baselines
-2. Compact temporal XGBoost (lags, rolling means, calendar, horizon)
-3. Same model plus k-nearest neighbor speeds
-4. Predicted mph → minutes with `distance_miles / max(speed, 5 mph) × 60`
-5. Dijkstra on a 207-node k-NN sensor graph (2,838 edges)
-6. Static / current-state / predictive / oracle routes, replayed on realized traffic
-
-The dense DCRNN distance table (11,546 edges) is too shortcut-heavy for routing. The app uses 8-nearest neighbors within 8 km, then adds reverse edges so the graph is strongly connected. Paths are **sensor relationships, not turn-by-turn roads**.
-
-## Installation
-
-Python 3.10+.
+## Run it locally
 
 ```bash
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev,app]"
-```
 
-Training the local HDF5 pipeline also needs `requirements-dev.txt` (PyTables/h5py). The Streamlit Cloud install file is `requirements.txt`.
-
-## Usage
-
-```bash
 python scripts/download_data.py
-python scripts/inspect_data.py
-python scripts/prepare_data.py
-python scripts/build_graph.py
-python scripts/generate_eda_figures.py
-python scripts/train_baseline.py
 python scripts/build_deployment_assets.py
-pytest
 streamlit run app/streamlit_app.py
 ```
 
-## Project structure
+The hosted app loads pre-built files from `artifacts/` and does not retrain.
+
+To deploy on [Streamlit Community Cloud](https://share.streamlit.io), point it at `app/streamlit_app.py` on `main`. See [docs/deployment.md](docs/deployment.md).
+
+## Repo layout
 
 ```text
-app/                     Streamlit product (home + pages)
-artifacts/               Compact models, demo week, metrics (committed)
-configs/                 YAML for data, models, routing
-docs/                    Dataset and deployment notes
-scripts/                 Download, clean, train, export
-src/trafficflow/         Installable package
+app/           Streamlit UI
+artifacts/     Models, demo data, metrics
+scripts/       Download, train, export
+src/trafficflow/   Core library
 tests/
+configs/       YAML settings
+docs/
 ```
 
-## Limitations
+## Caveats
 
-- Not a navigation product and not live traffic.
-- Sensor graph ≠ complete street map.
-- METR-LA is freeway loop detectors only.
-- 5.28% of cells remain missing after short-gap interpolation.
-- Routing does not model congestion feedback from the routed vehicles.
-- Spatial MAE gains are small; current-state routing is already competitive.
+- Freeway sensors only — not a city street map
+- Historical data, not live traffic
+- Small forecasting gains from spatial features
+- No model of how routed cars would affect congestion
